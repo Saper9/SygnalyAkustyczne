@@ -30,52 +30,48 @@ public class HandleJson {
         try {
             InputStream textInputStream = activity.getAssets().open(fileName);
             String json = IOUtils.toString(textInputStream, StandardCharsets.UTF_8);
-            resultJson = new JSONObject(json);
+            this.resultJson = new JSONObject(json);
 
         } catch (IOException | JSONException ex) {
             ex.printStackTrace();
         }
 
-        return resultJson;
+        return this.resultJson;
     }
 
     private Map<String, String> returnHashMap(Activity activity) {
 
-        if (resultJson != null) {
+        if (this.resultJson != null) {
 
-            Iterator<String> keys = resultJson.keys();
+            Iterator<String> keys = this.resultJson.keys();
             while (keys.hasNext()) {
 
                 final String currentKey = keys.next();
                 String currentValue = "";
 
                 try {
-                    currentValue = (String) resultJson.get(currentKey);
+                    currentValue = (String) this.resultJson.get(currentKey);
                 } catch (JSONException e1) {
                     e1.printStackTrace();
                 }
-                resultHashMap.put(currentKey, currentValue);
+                this.resultHashMap.put(currentKey, currentValue);
             }
 
         } else {
             Toast.makeText(activity, R.string.error_no_json_toast, Toast.LENGTH_SHORT).show();
         }
 
-        return resultHashMap;
+        return this.resultHashMap;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     Map<String, String> getHashMapFromAssets(Activity activity, String fileName) {
+        this.attempts = 0;
 
-        // to handle the possibility of some problems accessing the JSON file
-        // we try x times to get the file and display a toast if it fails
-
-        attempts = 0;
-
-        while(attempts <= MAX_TRY_COUNT
+        while(this.attempts <= MAX_TRY_COUNT
                 && resultJson == null){
 
-            attempts++;
+            this.attempts++;
             getJSONObjectFromAssets(activity, fileName);
         }
 
