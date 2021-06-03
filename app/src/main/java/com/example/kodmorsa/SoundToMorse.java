@@ -2,15 +2,30 @@ package com.example.kodmorsa;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.semantive.waveformandroid.waveform.soundfile.WavFile;
+import com.semantive.waveformandroid.waveform.soundfile.WavFileException;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Path;
 
 public class SoundToMorse extends AppCompatActivity {
     private MediaRecorder recorder;
@@ -19,25 +34,35 @@ public class SoundToMorse extends AppCompatActivity {
     Button recordStart;
     Button stopRecord;
 
-
-    //TODO fix function
-    private void prepareRecorder(){
-        recorder = new MediaRecorder();
-        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        recorder.setOutputFile("Test.wav");
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        try {
-            recorder.prepare();
-        } catch (IOException e) {
-            Log.e("startRecording", "prepare() failed");
+    public static File stream2file (InputStream in) throws IOException {
+        final File tempFile = File.createTempFile("TempFile", ".wav");
+        tempFile.deleteOnExit();
+        try (FileOutputStream out = new FileOutputStream(tempFile)) {
+            IOUtils.copy(in, out);
         }
-
-        recorder.start();
-
+        return tempFile;
     }
-    private void loadFile() throws IOException {
-        InputStream input=getAssets().open("Test.wav");
+
+    private void loadFile() throws IOException, WavFileException {
+
+        InputStream inp=getAssets().open("Test.wav");
+        File file=stream2file(inp);
+        WavFile wavfile=WavFile.openWavFile(file);
+
+        int[] buffer=new int[300];
+        int tmp=wavfile.readFrames(buffer,300);
+        Log.i("wavFileDD", String.valueOf(tmp));
+
+        //z pliku wavfile iterowac po nim co 4410 (tyle trwa kropka) sprawdzamy, czy wartosc jest rowna 0.0
+        //jezeli jest 0 to znaczy, ze dzwiek nie gra i klasyfikujemy jako kropke
+        //jeżeli kropka trwa jeden raz to jest to przerwa miedzy sygnalami w jednej literze
+        //jezeli trwa 3 kropki to jest to przerwa miedzy znakami
+        //jezeli nie jest rowna 0 to jest wtedy grajacym sygnalem
+        //jezeli gra raz to jest krotkim syngalem
+        //jezeli gra 3 razy to jest dlugim
+        //mierzyc co pol kropki, wtedy ominie sie przypadki , że przypadkowo ominiemy kropke
+
+
     }
 
 
@@ -57,6 +82,11 @@ public class SoundToMorse extends AppCompatActivity {
         recordStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                try {
+                    loadFile();
+                } catch (IOException | WavFileException e) {
+                    e.printStackTrace();
+                }
                 //prepareRecorder();
             }
         });
