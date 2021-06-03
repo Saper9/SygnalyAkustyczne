@@ -3,6 +3,7 @@ package com.example.kodmorsa;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -23,6 +24,9 @@ public class MainActivity extends AppCompatActivity {
     static boolean isThreadWorking = false;
     EditText morseTextField;
     String pattern;
+
+
+
     String morseSheetString="abcdefghijklmnoprstuvwxyz0123456789.,?!+-/ ";
     private void PlayGeneratedPattern() {
         Log.i("Pattern: ",pattern);
@@ -34,10 +38,13 @@ public class MainActivity extends AppCompatActivity {
         MorseTest.PlayPattern(morsePat);
 
     }
+    private void stopRecording(){
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MainActivity.context = getApplicationContext();
         setContentView(R.layout.activity_main);
         res = getResources();
         recordButton=findViewById(R.id.recordButton);
@@ -58,9 +65,24 @@ public class MainActivity extends AppCompatActivity {
                 } else isThreadWorking = false;
             }
         });
+
+        Button soundrecognition=findViewById(R.id.voiceButton);
+
+        soundrecognition.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                activitymaker();
+
+                //startActivity(new Intent(MainActivity.this,SoundToMorse.class));
+
+            }
+        });
     }
-    public static Context getAppContext() {
-        return MainActivity.context;
-    }
+public void activitymaker(){
+        Intent intent = new Intent(MainActivity.this,SoundToMorse.class);
+        intent.putExtra("test",true);
+        startActivity(intent);
+
+}
 
 }
