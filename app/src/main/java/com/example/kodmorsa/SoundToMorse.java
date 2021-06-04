@@ -11,6 +11,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.anychart.AnyChart;
+import com.anychart.AnyChartView;
+import com.anychart.charts.Cartesian;
+import com.anychart.charts.Pie;
+import com.anychart.core.annotations.Line;
 import com.jlibrosa.audio.JLibrosa;
 import com.jlibrosa.audio.exception.FileFormatNotSupportedException;
 import com.jlibrosa.audio.wavFile.WavFile;
@@ -49,6 +54,11 @@ public class SoundToMorse extends AppCompatActivity {
         JLibrosa jLibrosa = new JLibrosa();
         String test = file.toString();
         float audioFeatureValues [] = jLibrosa.loadAndRead(file.toString(), defaultSampleRate, defaultAudioDuration);
+//        Pie pie = Pie.instantiate();
+//        pie.title("TEST WAV");
+//        setContentView(R.layout.chart_layout);
+//        AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
+//        anyChartView.setChart(pie);
 //        ArrayList<Float> audioFeatureValuesList = jLibrosa.loadAndReadAsList(file.toString(), defaultSampleRate, defaultAudioDuration);
 //        WavFile wavfile=WavFile.openWavFile(file);
 ////        int[] buffer=new int[300];
