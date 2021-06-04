@@ -2,30 +2,21 @@ package com.example.kodmorsa;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
-import android.content.res.AssetFileDescriptor;
-import android.content.res.AssetManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.semantive.waveformandroid.waveform.soundfile.WavFile;
-import com.semantive.waveformandroid.waveform.soundfile.WavFileException;
-
-import org.apache.commons.io.FileUtils;
+import com.jlibrosa.audio.wavFile.WavFile;
+import com.jlibrosa.audio.wavFile.WavFileException;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Path;
 
 public class SoundToMorse extends AppCompatActivity {
     private MediaRecorder recorder;
@@ -49,9 +40,9 @@ public class SoundToMorse extends AppCompatActivity {
         File file=stream2file(inp);
         WavFile wavfile=WavFile.openWavFile(file);
 
-        int[] buffer=new int[300];
-        int tmp=wavfile.readFrames(buffer,300);
-        Log.i("wavFileDD", String.valueOf(tmp));
+//        int[] buffer=new int[300];
+//        int tmp=wavfile.readFrames(buffer,300);
+        Log.i("wavFileDD", String.valueOf(wavfile));
 
         //z pliku wavfile iterowac po nim co 4410 (tyle trwa kropka) sprawdzamy, czy wartosc jest rowna 0.0
         //jezeli jest 0 to znaczy, ze dzwiek nie gra i klasyfikujemy jako kropke
