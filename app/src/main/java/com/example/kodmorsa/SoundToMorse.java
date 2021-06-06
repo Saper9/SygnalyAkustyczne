@@ -26,6 +26,7 @@ import com.jlibrosa.audio.exception.FileFormatNotSupportedException;
 import com.jlibrosa.audio.wavFile.WavFile;
 import com.jlibrosa.audio.wavFile.WavFileException;
 import org.apache.commons.io.IOUtils;
+import org.jtransforms.fft.FloatFFT_1D;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -54,61 +55,38 @@ public class SoundToMorse extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void loadFile() throws IOException, WavFileException, FileFormatNotSupportedException {
-        InputStream inp = getAssets().open("Test.wav");
+    private void loadFile() throws IOException, WavFileException, FileFormatNotSupportedException, com.example.kodmorsa.WavFileException {
+        InputStream inp = getAssets().open("please give me 3.wav");
         File file = stream2file(inp);
-        int defaultSampleRate = -1;        //-1 value implies the method to use default sample rate
-        int defaultAudioDuration = -1;
-        JLibrosa jLibrosa = new JLibrosa();
-        float audioFeatureValues[] = jLibrosa.loadAndRead(file.toString(), defaultSampleRate, defaultAudioDuration);
-        setContentView(R.layout.chart_layout);
-//        Pie pie = Pie.instantiate();
-//        pie.title("TEST WAV");
+        MorseProcessor m_proc = new MorseProcessor(file.toString());
+        m_proc.process();
+        Log.i("Result: ", m_proc.result());
+        Log.i("File info: ", m_proc.toString());
 //
-
-
-        AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
-        Cartesian cartesian = AnyChart.line();
-        cartesian.title("Test test");
-        cartesian.yAxis(0).title("Value");
-        cartesian.xAxis(0).title("Sample");
-        List<DataEntry> seriesData = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
-            seriesData.add(new CustomDataEntry(i, audioFeatureValues[i]));
-        }
-        Set set = Set.instantiate();
-        set.data(seriesData);
-        Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
-        Line series1 = cartesian.line(series1Mapping);
-        series1.name("Test");
-        series1.hovered().markers().enabled(true);
-        series1.hovered().markers()
-                .type(MarkerType.CIRCLE)
-                .size(4d);
-        series1.tooltip()
-                .position("right")
-                .anchor(Anchor.LEFT_CENTER)
-                .offsetX(5d)
-                .offsetY(5d);
-        anyChartView.setChart(cartesian);
-
-//        anyChartView.setChart(pie);
-//        ArrayList<Float> audioFeatureValuesList = jLibrosa.loadAndReadAsList(file.toString(), defaultSampleRate, defaultAudioDuration);
-//        WavFile wavfile=WavFile.openWavFile(file);
-////        int[] buffer=new int[300];
-////        int tmp=wavfile.readFrames(buffer,300);
-//        Log.i("wavFileDD", String.valueOf(wavfile));
-
-        //z pliku wavfile iterowac po nim co 4410 (tyle trwa kropka) sprawdzamy, czy wartosc jest rowna 0.0
-        //jezeli jest 0 to znaczy, ze dzwiek nie gra i klasyfikujemy jako kropke
-        //jeżeli kropka trwa jeden raz to jest to przerwa miedzy sygnalami w jednej literze
-        //jezeli trwa 3 kropki to jest to przerwa miedzy znakami
-        //jezeli nie jest rowna 0 to jest wtedy grajacym sygnalem
-        //jezeli gra raz to jest krotkim syngalem
-        //jezeli gra 3 razy to jest dlugim
-        //mierzyc co pol kropki, wtedy ominie sie przypadki , że przypadkowo ominiemy kropke
-
-
+//        AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
+//        Cartesian cartesian = AnyChart.line();
+//        cartesian.title("Test test");
+//        cartesian.yAxis(0).title("Value");
+//        cartesian.xAxis(0).title("Sample");
+//        List<DataEntry> seriesData = new ArrayList<>();
+//        for (int i = 0; i < audioFeatureValues.length; i++) {
+//            seriesData.add(new CustomDataEntry(i, audioFeatureValues[i]));
+//        }
+//        Set set = Set.instantiate();
+//        set.data(seriesData);
+//        Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
+//        Line series1 = cartesian.line(series1Mapping);
+//        series1.name("Test");
+//        series1.hovered().markers().enabled(true);
+//        series1.hovered().markers()
+//                .type(MarkerType.CIRCLE)
+//                .size(4d);
+//        series1.tooltip()
+//                .position("right")
+//                .anchor(Anchor.LEFT_CENTER)
+//                .offsetX(5d)
+//                .offsetY(5d);
+//        anyChartView.setChart(cartesian);
     }
 
 
@@ -131,10 +109,9 @@ public class SoundToMorse extends AppCompatActivity {
             public void onClick(View v) {
                 try {
                     loadFile();
-                } catch (IOException | WavFileException | FileFormatNotSupportedException e) {
+                } catch (IOException | WavFileException | FileFormatNotSupportedException | com.example.kodmorsa.WavFileException e) {
                     e.printStackTrace();
                 }
-                //prepareRecorder();
             }
         });
 
@@ -146,7 +123,5 @@ public class SoundToMorse extends AppCompatActivity {
             }
         });
 
-
     }
-
 }

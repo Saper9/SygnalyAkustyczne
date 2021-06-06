@@ -46,4 +46,7 @@ dependencies {
     compile files('libs/jlibrosa-1.1.8-SNAPSHOT-jar-with-dependencies.jar')
     compile files('libs/jlibrosa-1.1.8-SNAPSHOT-javadoc.jar')
     implementation 'com.github.AnyChart:AnyChart-Android:1.1.2'
+    // https://mvnrepository.com/artifact/com.github.wendykierp/JTransforms
+    implementation group: 'com.github.wendykierp', name: 'JTransforms', version: '3.0'
+
 }
