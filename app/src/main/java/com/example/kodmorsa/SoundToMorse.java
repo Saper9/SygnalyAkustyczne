@@ -1,31 +1,39 @@
 package com.example.kodmorsa;
 
+import android.os.Build;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
-import android.content.res.AssetFileDescriptor;
-import android.content.res.AssetManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.semantive.waveformandroid.waveform.soundfile.WavFile;
-import com.semantive.waveformandroid.waveform.soundfile.WavFileException;
-
-import org.apache.commons.io.FileUtils;
+import com.anychart.AnyChart;
+import com.anychart.AnyChartView;
+import com.anychart.chart.common.dataentry.DataEntry;
+import com.anychart.charts.Cartesian;
+import com.anychart.charts.Pie;
+import com.anychart.core.annotations.Line;
+import com.anychart.data.Mapping;
+import com.anychart.data.Set;
+import com.jlibrosa.audio.JLibrosa;
+import com.jlibrosa.audio.exception.FileFormatNotSupportedException;
+import com.jlibrosa.audio.wavFile.WavFile;
+import com.jlibrosa.audio.wavFile.WavFileException;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Path;
+import java.sql.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class SoundToMorse extends AppCompatActivity {
     private MediaRecorder recorder;
@@ -43,15 +51,33 @@ public class SoundToMorse extends AppCompatActivity {
         return tempFile;
     }
 
-    private void loadFile() throws IOException, WavFileException {
-
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void loadFile() throws IOException, WavFileException, FileFormatNotSupportedException {
         InputStream inp=getAssets().open("Test.wav");
         File file=stream2file(inp);
-        WavFile wavfile=WavFile.openWavFile(file);
+        int defaultSampleRate = -1;		//-1 value implies the method to use default sample rate
+        int defaultAudioDuration = -1;
+        JLibrosa jLibrosa = new JLibrosa();
+        String test = file.toString();
+        float audioFeatureValues [] = jLibrosa.loadAndRead(file.toString(), defaultSampleRate, defaultAudioDuration);
+        setContentView(R.layout.chart_layout);
+//        Pie pie = Pie.instantiate();
+//        pie.title("TEST WAV");
+//
 
-        int[] buffer=new int[300];
-        int tmp=wavfile.readFrames(buffer,300);
-        Log.i("wavFileDD", String.valueOf(tmp));
+
+  AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
+  Cartesian cartesian =AnyChart.line();
+  cartesian.title("Test test");
+
+  anyChartView.setChart(cartesian);
+
+//        anyChartView.setChart(pie);
+//        ArrayList<Float> audioFeatureValuesList = jLibrosa.loadAndReadAsList(file.toString(), defaultSampleRate, defaultAudioDuration);
+//        WavFile wavfile=WavFile.openWavFile(file);
+////        int[] buffer=new int[300];
+////        int tmp=wavfile.readFrames(buffer,300);
+//        Log.i("wavFileDD", String.valueOf(wavfile));
 
         //z pliku wavfile iterowac po nim co 4410 (tyle trwa kropka) sprawdzamy, czy wartosc jest rowna 0.0
         //jezeli jest 0 to znaczy, ze dzwiek nie gra i klasyfikujemy jako kropke
@@ -80,11 +106,12 @@ public class SoundToMorse extends AppCompatActivity {
 
 
         recordStart.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onClick(View v) {
                 try {
                     loadFile();
-                } catch (IOException | WavFileException e) {
+                } catch (IOException | WavFileException | FileFormatNotSupportedException e) {
                     e.printStackTrace();
                 }
                 //prepareRecorder();
