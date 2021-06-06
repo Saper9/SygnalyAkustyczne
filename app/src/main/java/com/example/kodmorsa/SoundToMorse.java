@@ -16,9 +16,11 @@ import com.anychart.AnyChartView;
 import com.anychart.chart.common.dataentry.DataEntry;
 import com.anychart.charts.Cartesian;
 import com.anychart.charts.Pie;
-import com.anychart.core.annotations.Line;
+import com.anychart.core.cartesian.series.Line;
 import com.anychart.data.Mapping;
 import com.anychart.data.Set;
+import com.anychart.enums.Anchor;
+import com.anychart.enums.MarkerType;
 import com.jlibrosa.audio.JLibrosa;
 import com.jlibrosa.audio.exception.FileFormatNotSupportedException;
 import com.jlibrosa.audio.wavFile.WavFile;
@@ -42,7 +44,7 @@ public class SoundToMorse extends AppCompatActivity {
     Button recordStart;
     Button stopRecord;
 
-    public static File stream2file (InputStream in) throws IOException {
+    public static File stream2file(InputStream in) throws IOException {
         final File tempFile = File.createTempFile("TempFile", ".wav");
         tempFile.deleteOnExit();
         try (FileOutputStream out = new FileOutputStream(tempFile)) {
@@ -53,24 +55,42 @@ public class SoundToMorse extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void loadFile() throws IOException, WavFileException, FileFormatNotSupportedException {
-        InputStream inp=getAssets().open("Test.wav");
-        File file=stream2file(inp);
-        int defaultSampleRate = -1;		//-1 value implies the method to use default sample rate
+        InputStream inp = getAssets().open("Test.wav");
+        File file = stream2file(inp);
+        int defaultSampleRate = -1;        //-1 value implies the method to use default sample rate
         int defaultAudioDuration = -1;
         JLibrosa jLibrosa = new JLibrosa();
-        String test = file.toString();
-        float audioFeatureValues [] = jLibrosa.loadAndRead(file.toString(), defaultSampleRate, defaultAudioDuration);
+        float audioFeatureValues[] = jLibrosa.loadAndRead(file.toString(), defaultSampleRate, defaultAudioDuration);
         setContentView(R.layout.chart_layout);
 //        Pie pie = Pie.instantiate();
 //        pie.title("TEST WAV");
 //
 
 
-  AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
-  Cartesian cartesian =AnyChart.line();
-  cartesian.title("Test test");
-
-  anyChartView.setChart(cartesian);
+        AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
+        Cartesian cartesian = AnyChart.line();
+        cartesian.title("Test test");
+        cartesian.yAxis(0).title("Value");
+        cartesian.xAxis(0).title("Sample");
+        List<DataEntry> seriesData = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            seriesData.add(new CustomDataEntry(i, audioFeatureValues[i]));
+        }
+        Set set = Set.instantiate();
+        set.data(seriesData);
+        Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
+        Line series1 = cartesian.line(series1Mapping);
+        series1.name("Test");
+        series1.hovered().markers().enabled(true);
+        series1.hovered().markers()
+                .type(MarkerType.CIRCLE)
+                .size(4d);
+        series1.tooltip()
+                .position("right")
+                .anchor(Anchor.LEFT_CENTER)
+                .offsetX(5d)
+                .offsetY(5d);
+        anyChartView.setChart(cartesian);
 
 //        anyChartView.setChart(pie);
 //        ArrayList<Float> audioFeatureValuesList = jLibrosa.loadAndReadAsList(file.toString(), defaultSampleRate, defaultAudioDuration);
@@ -92,17 +112,17 @@ public class SoundToMorse extends AppCompatActivity {
     }
 
 
-    private void stopRecording(){
+    private void stopRecording() {
         recorder.stop();
         recorder.release();
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sound_to_morse);
-         recordStart=findViewById(R.id.listeningButton);
-         stopRecord=findViewById(R.id.stopButton);
-
+        recordStart = findViewById(R.id.listeningButton);
+        stopRecord = findViewById(R.id.stopButton);
 
 
         recordStart.setOnClickListener(new View.OnClickListener() {
@@ -128,7 +148,5 @@ public class SoundToMorse extends AppCompatActivity {
 
 
     }
-
-
 
 }
