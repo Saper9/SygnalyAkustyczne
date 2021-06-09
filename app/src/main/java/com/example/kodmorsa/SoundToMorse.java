@@ -1,13 +1,13 @@
 package com.example.kodmorsa;
 
 import android.os.Build;
+import android.util.Log;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -15,7 +15,6 @@ import com.anychart.AnyChart;
 import com.anychart.AnyChartView;
 import com.anychart.chart.common.dataentry.DataEntry;
 import com.anychart.charts.Cartesian;
-import com.anychart.charts.Pie;
 import com.anychart.core.cartesian.series.Line;
 import com.anychart.data.Mapping;
 import com.anychart.data.Set;
@@ -23,19 +22,14 @@ import com.anychart.enums.Anchor;
 import com.anychart.enums.MarkerType;
 import com.jlibrosa.audio.JLibrosa;
 import com.jlibrosa.audio.exception.FileFormatNotSupportedException;
-import com.jlibrosa.audio.wavFile.WavFile;
 import com.jlibrosa.audio.wavFile.WavFileException;
 import org.apache.commons.io.IOUtils;
-import org.jtransforms.fft.FloatFFT_1D;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.sql.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SoundToMorse extends AppCompatActivity {
@@ -56,37 +50,44 @@ public class SoundToMorse extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void loadFile() throws IOException, WavFileException, FileFormatNotSupportedException, com.example.kodmorsa.WavFileException {
-        InputStream inp = getAssets().open("please give me 3.wav");
+        InputStream inp = getAssets().open("500hz_noise.wav");
         File file = stream2file(inp);
-        MorseProcessor m_proc = new MorseProcessor(file.toString());
-        m_proc.process();
-        Log.i("Result: ", m_proc.result());
-        Log.i("File info: ", m_proc.toString());
-//
-//        AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
-//        Cartesian cartesian = AnyChart.line();
-//        cartesian.title("Test test");
-//        cartesian.yAxis(0).title("Value");
-//        cartesian.xAxis(0).title("Sample");
-//        List<DataEntry> seriesData = new ArrayList<>();
-//        for (int i = 0; i < audioFeatureValues.length; i++) {
-//            seriesData.add(new CustomDataEntry(i, audioFeatureValues[i]));
-//        }
-//        Set set = Set.instantiate();
-//        set.data(seriesData);
-//        Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
-//        Line series1 = cartesian.line(series1Mapping);
-//        series1.name("Test");
-//        series1.hovered().markers().enabled(true);
-//        series1.hovered().markers()
-//                .type(MarkerType.CIRCLE)
-//                .size(4d);
-//        series1.tooltip()
-//                .position("right")
-//                .anchor(Anchor.LEFT_CENTER)
-//                .offsetX(5d)
-//                .offsetY(5d);
-//        anyChartView.setChart(cartesian);
+        MorseToTextConverter morseToTextConverter = new MorseToTextConverter(file.toString());
+        morseToTextConverter.executeTranslation();
+        Log.i("File info: ", morseToTextConverter.toString());
+        inp.close();
+
+        int defaultSampleRate = -1;		//-1 value implies the method to use default sample rate
+        int defaultAudioDuration = -1;	//-1 value implies the method to process complete audio duration
+
+        JLibrosa jLibrosa = new JLibrosa();
+        float[] audioFeatureValues = jLibrosa.loadAndRead(file.toString(), defaultSampleRate, defaultAudioDuration);
+
+        setContentView(R.layout.chart_layout);
+        AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
+        Cartesian cartesian = AnyChart.line();
+        cartesian.title("Test test");
+        cartesian.yAxis(0).title("Value");
+        cartesian.xAxis(0).title("Sample");
+        List<DataEntry> seriesData = new ArrayList<>();
+        for (int i = 0; i < audioFeatureValues.length; i++) {
+            seriesData.add(new CustomDataEntry(i, audioFeatureValues[i]));
+        }
+        Set set = Set.instantiate();
+        set.data(seriesData);
+        Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
+        Line series1 = cartesian.line(series1Mapping);
+        series1.name("Test");
+        series1.hovered().markers().enabled(true);
+        series1.hovered().markers()
+                .type(MarkerType.CIRCLE)
+                .size(4d);
+        series1.tooltip()
+                .position("right")
+                .anchor(Anchor.LEFT_CENTER)
+                .offsetX(5d)
+                .offsetY(5d);
+        anyChartView.setChart(cartesian);
     }
 
 

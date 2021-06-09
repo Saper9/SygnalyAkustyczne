@@ -10,12 +10,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Random;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 public class MainActivity extends AppCompatActivity {
     private Button recordButton;
     private static Context context;
@@ -30,12 +24,12 @@ public class MainActivity extends AppCompatActivity {
     String morseSheetString="abcdefghijklmnoprstuvwxyz0123456789.,?!+-/ ";
     private void PlayGeneratedPattern() {
         Log.i("Pattern: ",pattern);
-        MorseTest.SetUpEverything();
-        MorseTest.GenerateSoundWave();
-        MorseTest.GenerateSoundWaveLine();
+        TextToMorseConverter.SetUpEverything();
+        TextToMorseConverter.GenerateSoundWave();
+        TextToMorseConverter.GenerateSoundWaveLine();
         pattern=pattern.toUpperCase();
-        String morsePat = MorseTest.ConvertPatternToMorsePattern(pattern);
-        MorseTest.PlayPattern(morsePat);
+        String morsePat = TextToMorseConverter.ConvertPatternToMorsePattern(pattern);
+        TextToMorseConverter.PlayPattern(morsePat);
 
     }
     private void stopRecording(){
