@@ -48,5 +48,7 @@ dependencies {
     implementation 'com.github.AnyChart:AnyChart-Android:1.1.2'
     // https://mvnrepository.com/artifact/com.github.wendykierp/JTransforms
     implementation group: 'com.github.wendykierp', name: 'JTransforms', version: '3.0'
+    // https://mvnrepository.com/artifact/com.github.hageldave.ezfftw/ezfftw
+    implementation group: 'com.github.hageldave.ezfftw', name: 'ezfftw', version: '0.1.2'
 
 }

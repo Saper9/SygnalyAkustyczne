@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SoundToMorse extends AppCompatActivity {
     private MediaRecorder recorder;
@@ -50,44 +51,47 @@ public class SoundToMorse extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void loadFile() throws IOException, WavFileException, FileFormatNotSupportedException, com.example.kodmorsa.WavFileException {
-        InputStream inp = getAssets().open("500hz_noise.wav");
+        InputStream inp = getAssets().open("sos_noise_high.wav");
         File file = stream2file(inp);
-        MorseToTextConverter morseToTextConverter = new MorseToTextConverter(file.toString());
-        morseToTextConverter.executeTranslation();
-        Log.i("File info: ", morseToTextConverter.toString());
+//        MorseToTextConverter morseToTextConverter = new MorseToTextConverter(file.toString());
+//        morseToTextConverter.executeTranslation();
+//        Log.i("File info: ", morseToTextConverter.toString());
         inp.close();
 
-        int defaultSampleRate = -1;		//-1 value implies the method to use default sample rate
-        int defaultAudioDuration = -1;	//-1 value implies the method to process complete audio duration
 
+//        int defaultSampleRate = -1;        //-1 value implies the method to use default sample rate
+        int defaultAudioDuration = -1;    //-1 value implies the method to process complete audio duration
+        int Fs = 48000; // Fs is sampling frequency -48 Khz
+        int Ts = 10 * Fs; // Total sample time is 10 seconds
         JLibrosa jLibrosa = new JLibrosa();
-        float[] audioFeatureValues = jLibrosa.loadAndRead(file.toString(), defaultSampleRate, defaultAudioDuration);
-
-        setContentView(R.layout.chart_layout);
-        AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
-        Cartesian cartesian = AnyChart.line();
-        cartesian.title("Test test");
-        cartesian.yAxis(0).title("Value");
-        cartesian.xAxis(0).title("Sample");
-        List<DataEntry> seriesData = new ArrayList<>();
-        for (int i = 0; i < audioFeatureValues.length; i++) {
-            seriesData.add(new CustomDataEntry(i, audioFeatureValues[i]));
-        }
-        Set set = Set.instantiate();
-        set.data(seriesData);
-        Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
-        Line series1 = cartesian.line(series1Mapping);
-        series1.name("Test");
-        series1.hovered().markers().enabled(true);
-        series1.hovered().markers()
-                .type(MarkerType.CIRCLE)
-                .size(4d);
-        series1.tooltip()
-                .position("right")
-                .anchor(Anchor.LEFT_CENTER)
-                .offsetX(5d)
-                .offsetY(5d);
-        anyChartView.setChart(cartesian);
+        ArrayList<Float> audioFeatureValues = jLibrosa.loadAndReadAsList(file.toString(), Fs, defaultAudioDuration);
+        List<Map<Integer, Float>> peaks = CustomUtils.peak_detection(audioFeatureValues, 0.01F);
+//
+//        setContentView(R.layout.chart_layout);
+//        AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
+//        Cartesian cartesian = AnyChart.line();
+//        cartesian.title("Test test");
+//        cartesian.yAxis(0).title("Value");
+//        cartesian.xAxis(0).title("Sample");
+//        List<DataEntry> seriesData = new ArrayList<>();
+//        for (int i = 0; i < audioFeatureValues.length; i++) {
+//            seriesData.add(new CustomDataEntry(i, audioFeatureValues[i]));
+//        }
+//        Set set = Set.instantiate();
+//        set.data(seriesData);
+//        Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
+//        Line series1 = cartesian.line(series1Mapping);
+//        series1.name("Test");
+//        series1.hovered().markers().enabled(true);
+//        series1.hovered().markers()
+//                .type(MarkerType.CIRCLE)
+//                .size(4d);
+//        series1.tooltip()
+//                .position("right")
+//                .anchor(Anchor.LEFT_CENTER)
+//                .offsetX(5d)
+//                .offsetY(5d);
+//        anyChartView.setChart(cartesian);
     }
 
 
