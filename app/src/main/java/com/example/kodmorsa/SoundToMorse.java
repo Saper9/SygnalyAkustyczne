@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 public class SoundToMorse extends AppCompatActivity {
@@ -62,7 +63,7 @@ public class SoundToMorse extends AppCompatActivity {
         JLibrosa jLibrosa = new JLibrosa();
         float [] audioFeatureValues = jLibrosa.loadAndRead(file.toString(), Fs, defaultAudioDuration);
         double [] audioValues = convertFloatsToDoubles(audioFeatureValues);
-        spectri(audioValues, Fs, 400, 600);
+        spectri(audioValues, Fs, 400, 600, 50);
 //        ArrayList<Float> audioFeatureValues = jLibrosa.loadAndReadAsList(file.toString(), Fs, defaultAudioDuration);
 //        List<Map<Integer, Float>> peaks = CustomUtils.peak_detection(audioFeatureValues, 0.01F);
 //
@@ -106,7 +107,7 @@ public class SoundToMorse extends AppCompatActivity {
         return output;
     }
 
-    private void spectri(double[] data, double Fs, int start_f, int stop_f) {
+    private void spectri(double[] data, double Fs, int start_f, int stop_f, double delta) {
         int N = data.length;
         Complex [] dataComplex= new Complex[data.length];
         for (int i = 0; i < data.length; i++) {
@@ -117,8 +118,8 @@ public class SoundToMorse extends AppCompatActivity {
         double df = Fs/N; // Frequency bin size
         double minf = -Fs/2;
         double maxf = Fs/2 - df;
-        int i = (int) Math.ceil(N/2 + (start_f * N / 2) / (Fs / 2));
-        int j = (int) Math.ceil(N/2 + (stop_f * N / 2) / (Fs / 2));
+        int i = (int) Math.round(N/2 + (start_f * N / 2) / (Fs / 2));
+        int j = (int) Math.round(N/2 + (stop_f * N / 2) / (Fs / 2));
         int howMany = (int) Math.ceil((maxf - minf) / df);
         List<Double> f = new ArrayList<>(howMany); // Frequency axis
         double k = minf;
@@ -132,6 +133,13 @@ public class SoundToMorse extends AppCompatActivity {
 
             double test = Math.abs(fftShift[l].Abs());
             y.add(20 * Math.log10(test));
+        }
+        List<Double> findPeaksArray = y.subList(i, j);
+        List<Map<Integer, Double>> peaks = CustomUtils.peak_detection(findPeaksArray, delta);
+        Map<Integer, Double> maxPeaks = peaks.get(0);
+        List<Double> peaksFrequencies = new ArrayList<>(maxPeaks.size());
+        for (Integer key : maxPeaks.keySet()) {
+            peaksFrequencies.add(f.get(key + i));
         }
         setContentView(R.layout.chart_layout);
         AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
@@ -159,6 +167,38 @@ public class SoundToMorse extends AppCompatActivity {
                 .offsetY(5d);
         anyChartView.setChart(cartesian);
     }
+
+//    TODO: FINISH IMPLEMENTATION OF A MATCHET FILTER!!!!!
+//    /**
+//     *
+//     * @param x audio signal (read from wavfile)
+//     * @param speed morse code speed in WPM
+//     * @param Fs sampling frequency
+//     * @param morseCodeFrequency morse code audio frequency
+//     * @return
+//     */
+//    public double [] mfilter(double[] x, int speed, double Fs, double morseCodeFrequency) {
+//        double dot_time = 1.2 / speed;
+//        int x_len = x.length;
+//        double[] t = new double[(int) (dot_time * Fs)];
+//        double sum = 0;
+//        for (int i = 0; i < t.length; i++) {
+//            t[i] = sum;
+//            sum += 1/Fs;
+//        }
+//
+//        double [] burst = new double[t.length];
+//        for (int i = 0; i < burst.length; i++) {
+//            burst[i] = Math.sin(2 * Math.PI * morseCodeFrequency * t[i]);
+//        }
+//        int N = burst.length;
+//
+////        List<Integer, Double> xk = new ArrayList<>();
+////        for (int i = 0; i < x_len - N; i++) {
+////            xk.add(x[])
+////        }
+//    }
+
     private void stopRecording() {
         recorder.stop();
         recorder.release();
