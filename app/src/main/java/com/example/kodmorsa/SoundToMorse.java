@@ -10,6 +10,7 @@ import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.anychart.AnyChart;
 import com.anychart.AnyChartView;
@@ -51,21 +52,25 @@ public class SoundToMorse extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void loadFile() throws IOException, WavFileException, FileFormatNotSupportedException, com.example.kodmorsa.WavFileException {
-        InputStream inp = getAssets().open("sos_noise_high.wav");
+        InputStream inp = getAssets().open("sos.wav");
         File file = stream2file(inp);
-//        MorseToTextConverter morseToTextConverter = new MorseToTextConverter(file.toString());
-//        morseToTextConverter.executeTranslation();
-//        Log.i("File info: ", morseToTextConverter.toString());
+         MorseToTextConverter morseToTextConverter = new MorseToTextConverter(file.toString());
+        morseToTextConverter.executeTranslation();
+        Log.i("File info: ", morseToTextConverter.toString());
+        Log.i("Result: ", morseToTextConverter.result());
         inp.close();
+        setContentView(R.layout.chart_layout);
+        TextView resultView=findViewById(R.id.ResultShowing);
+        resultView.setText(morseToTextConverter.result());
 
 
 //        int defaultSampleRate = -1;        //-1 value implies the method to use default sample rate
-        int defaultAudioDuration = -1;    //-1 value implies the method to process complete audio duration
-        int Fs = 48000; // Fs is sampling frequency -48 Khz
-        int Ts = 10 * Fs; // Total sample time is 10 seconds
-        JLibrosa jLibrosa = new JLibrosa();
-        ArrayList<Float> audioFeatureValues = jLibrosa.loadAndReadAsList(file.toString(), Fs, defaultAudioDuration);
-        List<Map<Integer, Float>> peaks = CustomUtils.peak_detection(audioFeatureValues, 0.01F);
+        //int defaultAudioDuration = -1;    //-1 value implies the method to process complete audio duration
+        //int Fs = 48000; // Fs is sampling frequency -48 Khz
+        //int Ts = 10 * Fs; // Total sample time is 10 seconds
+        //JLibrosa jLibrosa = new JLibrosa();
+       // ArrayList<Float> audioFeatureValues = jLibrosa.loadAndReadAsList(file.toString(), Fs, defaultAudioDuration);
+        //List<Map<Integer, Float>> peaks = CustomUtils.peak_detection(audioFeatureValues, 0.01F);
 //
 //        setContentView(R.layout.chart_layout);
 //        AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
