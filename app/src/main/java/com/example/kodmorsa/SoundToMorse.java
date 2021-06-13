@@ -8,10 +8,20 @@ import android.view.View;
 import android.widget.Button;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import com.anychart.AnyChart;
+import com.anychart.AnyChartView;
+import com.anychart.chart.common.dataentry.DataEntry;
+import com.anychart.charts.Cartesian;
+import com.anychart.core.cartesian.series.Line;
+import com.anychart.data.Mapping;
+import com.anychart.data.Set;
+import com.anychart.enums.Anchor;
+import com.anychart.enums.MarkerType;
 import com.jlibrosa.audio.JLibrosa;
 import com.jlibrosa.audio.exception.FileFormatNotSupportedException;
 import com.jlibrosa.audio.wavFile.WavFileException;
 import org.apache.commons.io.IOUtils;
+import org.jtransforms.fft.DoubleFFT_1D;
 import org.jtransforms.fft.FloatFFT_1D;
 
 import java.io.File;
@@ -54,7 +64,8 @@ public class SoundToMorse extends AppCompatActivity {
         int Fs = 48000; // Fs is sampling frequency -48 Khz
         JLibrosa jLibrosa = new JLibrosa();
         float [] audioFeatureValues = jLibrosa.loadAndRead(file.toString(), Fs, defaultAudioDuration);
-        spectri(audioFeatureValues, Fs, 0, 0);
+        double [] audioValues = convertFloatsToDoubles(audioFeatureValues);
+        spectri(audioValues, Fs, 0, 0);
 //        ArrayList<Float> audioFeatureValues = jLibrosa.loadAndReadAsList(file.toString(), Fs, defaultAudioDuration);
 //        List<Map<Integer, Float>> peaks = CustomUtils.peak_detection(audioFeatureValues, 0.01F);
 //
@@ -84,26 +95,67 @@ public class SoundToMorse extends AppCompatActivity {
 //                .offsetY(5d);
 //        anyChartView.setChart(cartesian);
     }
+    public static double[] convertFloatsToDoubles(float[] input)
+    {
+        if (input == null)
+        {
+            return null; // Or throw an exception - your choice
+        }
+        double[] output = new double[input.length];
+        for (int i = 0; i < input.length; i++)
+        {
+            output[i] = input[i];
+        }
+        return output;
+    }
 
-    private void spectri(float[] data, int Fs, int start_f, int stop_f) {
+    private void spectri(double[] data, double Fs, int start_f, int stop_f) {
         int N = data.length;
-        float[] spec = Arrays.copyOf(data, data.length);
-        FloatFFT_1D fft = new FloatFFT_1D(spec.length);
+        double[] spec = Arrays.copyOf(data, data.length);
+        DoubleFFT_1D fft = new DoubleFFT_1D(spec.length);
         fft.realForward(spec);
-        int df = Fs/N; // Frequency bin size
-        int minf = -Fs/2;
-        int maxf = Fs/2 - df;
-        int i = Math.round(N/2 + (start_f * N / 2) / (Fs / 2));
-        int j = Math.round(N/2 + (stop_f * N / 2) / (Fs / 2));
-        List<Integer> f = new ArrayList<>(); // Frequency axis
-        for (int k = minf; k <= maxf; k += df) {
+        double df = Fs/N; // Frequency bin size
+        double minf = -Fs/2;
+        double maxf = Fs/2 - df;
+        int i = (int) Math.round(N/2 + (start_f * N / 2) / (Fs / 2));
+        int j = (int) Math.round(N/2 + (stop_f * N / 2) / (Fs / 2));
+        int howMany = (int) Math.ceil((maxf - minf) / df);
+        List<Double> f = new ArrayList<>(howMany); // Frequency axis
+        double k = minf;
+        while (k <= maxf) {
             f.add(k);
+            k += df;
         }
-        float[] fftShift = fftshift(spec, false, true);
-        float[] y = new float[spec.length];
-        for (int k = 0; k < spec.length; k ++) {
-            y[k] = (float) (20 * Math.log10(Math.abs(fftShift[k])));
+        double[] fftShift = fftshift(spec, false, true);
+        List<Double> y = new ArrayList<Double>(spec.length);
+        for (int l = 0; l < spec.length; l ++) {
+            y.add(20 * Math.log10(Math.abs(fftShift[l])));
         }
+        setContentView(R.layout.chart_layout);
+        AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
+        Cartesian cartesian = AnyChart.line();
+        cartesian.title("Test test");
+        cartesian.yAxis(0).title("Value");
+        cartesian.xAxis(0).title("Sample");
+        List<DataEntry> seriesData = new ArrayList<>();
+        for (int p = 0; p < f.size(); p++) {
+            seriesData.add(new CustomDataEntry(f.get(p), y.get(p)));
+        }
+        Set set = Set.instantiate();
+        set.data(seriesData);
+        Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
+        Line series1 = cartesian.line(series1Mapping);
+        series1.name("Test");
+        series1.hovered().markers().enabled(true);
+        series1.hovered().markers()
+                .type(MarkerType.CIRCLE)
+                .size(4d);
+        series1.tooltip()
+                .position("right")
+                .anchor(Anchor.LEFT_CENTER)
+                .offsetX(5d)
+                .offsetY(5d);
+        anyChartView.setChart(cartesian);
     }
     private void stopRecording() {
         recorder.stop();
@@ -112,15 +164,15 @@ public class SoundToMorse extends AppCompatActivity {
 
     /**
      * shift zero frequency to center, or vice verse, 1D.
-     * @param data the float data to be shifted
+     * @param data the double data to be shifted
      * @param bComplex true: complex; false: real
      * @param bSign true: fftshift; false: ifftshift
      * @return the fft shifted array
      */
 
-    public static float []  fftshift(float [] data, boolean bComplex, boolean bSign)
+    public static double []  fftshift(double [] data, boolean bComplex, boolean bSign)
     {
-        float [] revan = new float [data.length];
+        double [] revan = new double [data.length];
 
         int step = 1;
         if (bComplex) step = 2;
