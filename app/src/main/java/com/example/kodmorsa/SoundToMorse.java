@@ -1,37 +1,27 @@
 package com.example.kodmorsa;
 
-import android.os.Build;
-import android.util.Log;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-
-import com.anychart.AnyChart;
-import com.anychart.AnyChartView;
-import com.anychart.chart.common.dataentry.DataEntry;
-import com.anychart.charts.Cartesian;
-import com.anychart.core.cartesian.series.Line;
-import com.anychart.data.Mapping;
-import com.anychart.data.Set;
-import com.anychart.enums.Anchor;
-import com.anychart.enums.MarkerType;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
 import com.jlibrosa.audio.JLibrosa;
 import com.jlibrosa.audio.exception.FileFormatNotSupportedException;
 import com.jlibrosa.audio.wavFile.WavFileException;
 import org.apache.commons.io.IOUtils;
+import org.jtransforms.fft.FloatFFT_1D;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+
 
 public class SoundToMorse extends AppCompatActivity {
     private MediaRecorder recorder;
@@ -62,10 +52,11 @@ public class SoundToMorse extends AppCompatActivity {
 //        int defaultSampleRate = -1;        //-1 value implies the method to use default sample rate
         int defaultAudioDuration = -1;    //-1 value implies the method to process complete audio duration
         int Fs = 48000; // Fs is sampling frequency -48 Khz
-        int Ts = 10 * Fs; // Total sample time is 10 seconds
         JLibrosa jLibrosa = new JLibrosa();
-        ArrayList<Float> audioFeatureValues = jLibrosa.loadAndReadAsList(file.toString(), Fs, defaultAudioDuration);
-        List<Map<Integer, Float>> peaks = CustomUtils.peak_detection(audioFeatureValues, 0.01F);
+        float [] audioFeatureValues = jLibrosa.loadAndRead(file.toString(), Fs, defaultAudioDuration);
+        spectri(audioFeatureValues, Fs, 0, 0);
+//        ArrayList<Float> audioFeatureValues = jLibrosa.loadAndReadAsList(file.toString(), Fs, defaultAudioDuration);
+//        List<Map<Integer, Float>> peaks = CustomUtils.peak_detection(audioFeatureValues, 0.01F);
 //
 //        setContentView(R.layout.chart_layout);
 //        AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
@@ -94,10 +85,72 @@ public class SoundToMorse extends AppCompatActivity {
 //        anyChartView.setChart(cartesian);
     }
 
-
+    private void spectri(float[] data, int Fs, int start_f, int stop_f) {
+        int N = data.length;
+        float[] spec = Arrays.copyOf(data, data.length);
+        FloatFFT_1D fft = new FloatFFT_1D(spec.length);
+        fft.realForward(spec);
+        int df = Fs/N; // Frequency bin size
+        int minf = -Fs/2;
+        int maxf = Fs/2 - df;
+        int i = Math.round(N/2 + (start_f * N / 2) / (Fs / 2));
+        int j = Math.round(N/2 + (stop_f * N / 2) / (Fs / 2));
+        List<Integer> f = new ArrayList<>(); // Frequency axis
+        for (int k = minf; k <= maxf; k += df) {
+            f.add(k);
+        }
+        float[] fftShift = fftshift(spec, false, true);
+        float[] y = new float[spec.length];
+        for (int k = 0; k < spec.length; k ++) {
+            y[k] = (float) (20 * Math.log10(Math.abs(fftShift[k])));
+        }
+    }
     private void stopRecording() {
         recorder.stop();
         recorder.release();
+    }
+
+    /**
+     * shift zero frequency to center, or vice verse, 1D.
+     * @param data the float data to be shifted
+     * @param bComplex true: complex; false: real
+     * @param bSign true: fftshift; false: ifftshift
+     * @return the fft shifted array
+     */
+
+    public static float []  fftshift(float [] data, boolean bComplex, boolean bSign)
+    {
+        float [] revan = new float [data.length];
+
+        int step = 1;
+        if (bComplex) step = 2;
+        int len = data.length/step;
+        int p = 0;
+        if(bSign)
+            p = (int) Math.ceil(len/2.0);
+        else
+            p = (int) Math.floor(len/2.0);
+
+        int i=0;
+        if (step==1){
+            for (i=p;i<len;i++){
+                revan[i-p] = data[i];
+            }
+            for (i=0;i<p;i++){
+                revan[i+len-p] = data[i];
+            }
+        }
+        else{
+            for (i=p;i<len;i++){
+                revan[(i-p)*2] = data[i*2];
+                revan[(i-p)*2+1] = data[i*2+1];
+            }
+            for (i=0;i<p;i++){
+                revan[(i+len-p)*2] = data[i*2];
+                revan[(i+len-p)*2+1] = data[i*2+1];
+            }
+        }
+        return revan;
     }
 
     @Override
