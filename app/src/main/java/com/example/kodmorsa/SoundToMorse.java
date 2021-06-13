@@ -117,6 +117,7 @@ public class SoundToMorse extends AppCompatActivity {
         double df = Fs/N; // Frequency bin size
         double minf = -Fs/2;
         double maxf = Fs/2 - df;
+
         int i = (int) Math.ceil(N/2 + (start_f * N / 2) / (Fs / 2));
         int j = (int) Math.ceil(N/2 + (stop_f * N / 2) / (Fs / 2));
         int howMany = (int) Math.ceil((maxf - minf) / df);
