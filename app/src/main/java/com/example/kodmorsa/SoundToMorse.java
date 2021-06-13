@@ -135,7 +135,7 @@ public class SoundToMorse extends AppCompatActivity {
         setContentView(R.layout.chart_layout);
         AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
         Cartesian cartesian = AnyChart.line();
-        cartesian.title("Test test");
+        cartesian.title("Spectrum");
         cartesian.yAxis(0).title("Volume [dB]");
         cartesian.xAxis(0).title("Frequency [Hz]");
         List<DataEntry> seriesData = new ArrayList<>();
@@ -146,7 +146,6 @@ public class SoundToMorse extends AppCompatActivity {
         set.data(seriesData);
         Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
         Line series1 = cartesian.line(series1Mapping);
-        series1.name("Spectrum");
         series1.hovered().markers().enabled(true);
         series1.hovered().markers()
                 .type(MarkerType.CIRCLE)
