@@ -21,16 +21,12 @@ import com.jlibrosa.audio.JLibrosa;
 import com.jlibrosa.audio.exception.FileFormatNotSupportedException;
 import com.jlibrosa.audio.wavFile.WavFileException;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.math3.complex.Complex;
-import org.jtransforms.fft.DoubleFFT_1D;
-import org.jtransforms.fft.FloatFFT_1D;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -66,7 +62,7 @@ public class SoundToMorse extends AppCompatActivity {
         JLibrosa jLibrosa = new JLibrosa();
         float [] audioFeatureValues = jLibrosa.loadAndRead(file.toString(), Fs, defaultAudioDuration);
         double [] audioValues = convertFloatsToDoubles(audioFeatureValues);
-        spectri(audioValues, Fs, 0, 2500);
+        spectri(audioValues, Fs, 400, 600);
 //        ArrayList<Float> audioFeatureValues = jLibrosa.loadAndReadAsList(file.toString(), Fs, defaultAudioDuration);
 //        List<Map<Integer, Float>> peaks = CustomUtils.peak_detection(audioFeatureValues, 0.01F);
 //
@@ -112,16 +108,15 @@ public class SoundToMorse extends AppCompatActivity {
 
     private void spectri(double[] data, double Fs, int start_f, int stop_f) {
         int N = data.length;
-        double[] spec = Arrays.copyOf(data, data.length);
-        com.example.kodmorsa.Complex [] dataComplex= new com.example.kodmorsa.Complex[data.length];
-        com.example.kodmorsa.Complex[] fftNew=new com.example.kodmorsa.Complex[data.length];
-        fftNew=FFT.fft1D(dataComplex);
-        //DoubleFFT_1D fft = new DoubleFFT_1D(spec.length);
-        //fft.complexForward(spec);
+        Complex [] dataComplex= new Complex[data.length];
+        for (int i = 0; i < data.length; i++) {
+            dataComplex[i] = new Complex(data[i], 0);
+        }
+        Complex[] fftNew = FFT.fft1D(dataComplex);
+
         double df = Fs/N; // Frequency bin size
         double minf = -Fs/2;
         double maxf = Fs/2 - df;
-
         int i = (int) Math.ceil(N/2 + (start_f * N / 2) / (Fs / 2));
         int j = (int) Math.ceil(N/2 + (stop_f * N / 2) / (Fs / 2));
         int howMany = (int) Math.ceil((maxf - minf) / df);
@@ -131,10 +126,9 @@ public class SoundToMorse extends AppCompatActivity {
             f.add(k);
             k += df;
         }
-        //double[] fftShift = fftshift(fftNew, false, true);
-        com.example.kodmorsa.Complex[] fftShift=FFT.fftShift1D(fftNew);
-        List<Double> y = new ArrayList<Double>(spec.length);
-        for (int l = 0; l < spec.length; l ++) {
+        Complex[] fftShift=FFT.fftShift1D(fftNew);
+        List<Double> y = new ArrayList<Double>(fftNew.length);
+        for (int l = 0; l < fftNew.length; l ++) {
 
             double test = Math.abs(fftShift[l].Abs());
             y.add(20 * Math.log10(test));
@@ -142,7 +136,7 @@ public class SoundToMorse extends AppCompatActivity {
         setContentView(R.layout.chart_layout);
         AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
         Cartesian cartesian = AnyChart.line();
-        cartesian.title("Spectrum");
+        cartesian.title("Test test");
         cartesian.yAxis(0).title("Volume [dB]");
         cartesian.xAxis(0).title("Frequency [Hz]");
         List<DataEntry> seriesData = new ArrayList<>();
@@ -153,6 +147,7 @@ public class SoundToMorse extends AppCompatActivity {
         set.data(seriesData);
         Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
         Line series1 = cartesian.line(series1Mapping);
+        series1.name("Spectrum");
         series1.hovered().markers().enabled(true);
         series1.hovered().markers()
                 .type(MarkerType.CIRCLE)
