@@ -65,7 +65,7 @@ public class SoundToMorse extends AppCompatActivity {
         JLibrosa jLibrosa = new JLibrosa();
         float [] audioFeatureValues = jLibrosa.loadAndRead(file.toString(), Fs, defaultAudioDuration);
         double [] audioValues = convertFloatsToDoubles(audioFeatureValues);
-        spectri(audioValues, Fs, 0, 0);
+        spectri(audioValues, Fs, 0, 2500);
 //        ArrayList<Float> audioFeatureValues = jLibrosa.loadAndReadAsList(file.toString(), Fs, defaultAudioDuration);
 //        List<Map<Integer, Float>> peaks = CustomUtils.peak_detection(audioFeatureValues, 0.01F);
 //
@@ -117,8 +117,8 @@ public class SoundToMorse extends AppCompatActivity {
         double df = Fs/N; // Frequency bin size
         double minf = -Fs/2;
         double maxf = Fs/2 - df;
-        int i = (int) Math.round(N/2 + (start_f * N / 2) / (Fs / 2));
-        int j = (int) Math.round(N/2 + (stop_f * N / 2) / (Fs / 2));
+        int i = (int) Math.ceil(N/2 + (start_f * N / 2) / (Fs / 2));
+        int j = (int) Math.ceil(N/2 + (stop_f * N / 2) / (Fs / 2));
         int howMany = (int) Math.ceil((maxf - minf) / df);
         List<Double> f = new ArrayList<>(howMany); // Frequency axis
         double k = minf;
@@ -129,23 +129,24 @@ public class SoundToMorse extends AppCompatActivity {
         double[] fftShift = fftshift(spec, false, true);
         List<Double> y = new ArrayList<Double>(spec.length);
         for (int l = 0; l < spec.length; l ++) {
-            y.add(20 * Math.log10(Math.abs(fftShift[l])));
+            double test = Math.abs(fftShift[l]);
+            y.add(20 * Math.log10(test));
         }
         setContentView(R.layout.chart_layout);
         AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
         Cartesian cartesian = AnyChart.line();
         cartesian.title("Test test");
-        cartesian.yAxis(0).title("Value");
-        cartesian.xAxis(0).title("Sample");
+        cartesian.yAxis(0).title("Volume [dB]");
+        cartesian.xAxis(0).title("Frequency [Hz]");
         List<DataEntry> seriesData = new ArrayList<>();
-        for (int p = 0; p < f.size(); p++) {
+        for (int p = i; p < j; p++) {
             seriesData.add(new CustomDataEntry(f.get(p), y.get(p)));
         }
         Set set = Set.instantiate();
         set.data(seriesData);
         Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
         Line series1 = cartesian.line(series1Mapping);
-        series1.name("Test");
+        series1.name("Spectrum");
         series1.hovered().markers().enabled(true);
         series1.hovered().markers()
                 .type(MarkerType.CIRCLE)
