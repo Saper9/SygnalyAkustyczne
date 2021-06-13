@@ -72,8 +72,6 @@ public class TextToMorseConverter extends MainActivity {
     public static String ConvertPatternToMorsePattern(String pattern) {
         String morsePattern = "";
         GenerateSoundWave();
-        //dac jsona zamiast ifow
-
         for (int i = 0; i < pattern.length(); i++) {
             Log.i("charPattern", String.valueOf(pattern.charAt(i)));
             if (pattern.charAt(i) == 'A') morsePattern += ".- ";
@@ -119,8 +117,6 @@ public class TextToMorseConverter extends MainActivity {
             if (pattern.charAt(i) == '8') morsePattern += "---.. ";
             if (pattern.charAt(i) == '9') morsePattern += "----. ";
 
-            //obejcie, spacja miedzy wyrazami
-            //TODO zrobic to lepiej
             if (pattern.charAt(i) == ' ') morsePattern += "[";
 
 
@@ -130,7 +126,6 @@ public class TextToMorseConverter extends MainActivity {
 
     }
 
-    //dot kropka play
     private static void PlayDot() {
 
         audioTrack.write(samples, 0, 8000);
@@ -139,9 +134,6 @@ public class TextToMorseConverter extends MainActivity {
 
     private static void PlayLine() {
 
-        //audioTrack.write(samples, 0, 8000);
-        // audioTrack.write(samples, 0, 8000);
-        //audioTrack.write(samples, 0, 8000);
         audioTrack.write(samplesLine, 0, numofSamples * 3);
 
 

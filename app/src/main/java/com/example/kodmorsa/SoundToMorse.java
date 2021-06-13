@@ -21,6 +21,7 @@ import com.jlibrosa.audio.JLibrosa;
 import com.jlibrosa.audio.exception.FileFormatNotSupportedException;
 import com.jlibrosa.audio.wavFile.WavFileException;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.math3.complex.Complex;
 import org.jtransforms.fft.DoubleFFT_1D;
 import org.jtransforms.fft.FloatFFT_1D;
 
@@ -112,8 +113,11 @@ public class SoundToMorse extends AppCompatActivity {
     private void spectri(double[] data, double Fs, int start_f, int stop_f) {
         int N = data.length;
         double[] spec = Arrays.copyOf(data, data.length);
-        DoubleFFT_1D fft = new DoubleFFT_1D(spec.length);
-        fft.realForward(spec);
+        com.example.kodmorsa.Complex [] dataComplex= new com.example.kodmorsa.Complex[data.length];
+        com.example.kodmorsa.Complex[] fftNew=new com.example.kodmorsa.Complex[data.length];
+        fftNew=FFT.fft1D(dataComplex);
+        //DoubleFFT_1D fft = new DoubleFFT_1D(spec.length);
+        //fft.complexForward(spec);
         double df = Fs/N; // Frequency bin size
         double minf = -Fs/2;
         double maxf = Fs/2 - df;
@@ -127,10 +131,12 @@ public class SoundToMorse extends AppCompatActivity {
             f.add(k);
             k += df;
         }
-        double[] fftShift = fftshift(spec, false, true);
+        //double[] fftShift = fftshift(fftNew, false, true);
+        com.example.kodmorsa.Complex[] fftShift=FFT.fftShift1D(fftNew);
         List<Double> y = new ArrayList<Double>(spec.length);
         for (int l = 0; l < spec.length; l ++) {
-            double test = Math.abs(fftShift[l]);
+
+            double test = Math.abs(fftShift[l].Abs());
             y.add(20 * Math.log10(test));
         }
         setContentView(R.layout.chart_layout);
