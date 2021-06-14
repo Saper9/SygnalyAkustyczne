@@ -239,6 +239,46 @@ public class MorseToTextConverter {
 
     }
 
+    public WavFile getWavFile() {
+        return wavFile;
+    }
+
+    public int getNumChannels() {
+        return numChannels;
+    }
+
+    public int getSampleRate() {
+        return sampleRate;
+    }
+
+    public int getFramesRead() {
+        return framesRead;
+    }
+
+    public int getMediumSignalValue() {
+        return mediumSignalValue;
+    }
+
+    public int getCheckStateInterval() {
+        return checkStateInterval;
+    }
+
+    public int getMediumSilenceValue() {
+        return mediumSilenceValue;
+    }
+
+    public double getMinSampleValue() {
+        return minSampleValue;
+    }
+
+    public double[] getBuffer() {
+        return buffer;
+    }
+
+    public String getDecodedMorseResult() {
+        return decodedMorseResult;
+    }
+
     public void displayInfo() {
         System.out.print(this.wavFile.getInfo());
     }
