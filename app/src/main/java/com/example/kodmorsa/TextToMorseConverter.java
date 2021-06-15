@@ -128,7 +128,7 @@ public class TextToMorseConverter extends MainActivity {
 
     private static void PlayDot() {
 
-        audioTrack.write(samples, 0, 8000);
+        audioTrack.write(samples, 0, numofSamples);
 
     }
 

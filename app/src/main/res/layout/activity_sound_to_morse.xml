@@ -6,43 +6,47 @@
     android:layout_height="match_parent"
     tools:context=".SoundToMorse">
 
+    <com.anychart.AnyChartView
+            android:id="@+id/any_chart_view"
+            android:layout_width="345dp"
+            android:layout_height="462dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="16dp"/>
     <Button
-        android:id="@+id/listeningButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Rozpocznij Nasłuch"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
+            android:id="@+id/listeningButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Spectral demorse"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" app:layout_constraintHorizontal_bias="0.497"
+            app:layout_constraintVertical_bias="0.893"/>
     <Button
-        android:id="@+id/stopButton"
-        android:layout_width="208dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="103dp"
-        android:layout_marginLeft="103dp"
-        android:layout_marginTop="64dp"
-        android:layout_marginEnd="100dp"
-        android:layout_marginRight="100dp"
-        android:text="Zakończ Nasłuch"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.607" />
-
+            android:id="@+id/stopButton"
+            android:layout_width="208dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="103dp"
+            android:layout_marginTop="64dp"
+            android:layout_marginEnd="100dp"
+            android:text="Average Demorse"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.974"/>
     <TextView
-        android:id="@+id/decodedTextField"
-        android:layout_width="198dp"
-        android:layout_height="94dp"
-        android:text="TextView"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.483"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.196" />
+            android:id="@+id/decodedTextField"
+            android:layout_width="251dp"
+            android:layout_height="64dp"
+            android:text="TextView"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.796"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
