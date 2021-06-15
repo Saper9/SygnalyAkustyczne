@@ -46,7 +46,7 @@ public class SoundToMorse extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void averageMorse() throws IOException, com.example.kodmorsa.WavFileException, FileFormatNotSupportedException, WavFileException {
-        InputStream inp = getAssets().open("please give me 3_no_noise.wav");
+        InputStream inp = getAssets().open("sos.wav");
         File file = stream2file(inp);
         MorseToTextConverter morseToTextConverter = new MorseToTextConverter(file.toString());
         morseToTextConverter.executeTranslation();
@@ -67,7 +67,7 @@ public class SoundToMorse extends AppCompatActivity {
         cartesian.yAxis(0).title("Value");
         cartesian.xAxis(0).title("Sample");
         List<DataEntry> seriesData = new ArrayList<>();
-        for (int i = 0; i < audioValues.length; i++) {
+        for (int i = 0; i < audioValues.length / 2; i++) {
             seriesData.add(new CustomDataEntry(i, audioValues[i]));
         }
         Set set = Set.instantiate();
@@ -88,7 +88,7 @@ public class SoundToMorse extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void originalSignal() throws IOException, WavFileException, FileFormatNotSupportedException, com.example.kodmorsa.WavFileException, InterruptedException {
-        InputStream inp = getAssets().open("sos.wav");
+        InputStream inp = getAssets().open("sos_noise_high.wav");
         File file = stream2file(inp);
         MorseToTextConverter morseToTextConverter = new MorseToTextConverter(file.toString());
         inp.close();
@@ -100,30 +100,30 @@ public class SoundToMorse extends AppCompatActivity {
         float[] audioFeatureValues = jLibrosa.loadAndRead(file.toString(), defaultSampleRate, defaultAudioDuration);
         double[] audioValues = convertFloatsToDoubles(audioFeatureValues);
 
-        setContentView(R.layout.chart_layout);
-        AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
-        Cartesian cartesian = AnyChart.line();
-        cartesian.title("Original signal");
-        cartesian.yAxis(0).title("Value");
-        cartesian.xAxis(0).title("Sample");
-        List<DataEntry> seriesData = new ArrayList<>();
-        for (int i = 0; i < audioValues.length; i++) {
-            seriesData.add(new CustomDataEntry(i, audioValues[i]));
-        }
-        Set set = Set.instantiate();
-        set.data(seriesData);
-        Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
-        Line series1 = cartesian.line(series1Mapping);
-        series1.hovered().markers().enabled(true);
-        series1.hovered().markers()
-                .type(MarkerType.CIRCLE)
-                .size(4d);
-        series1.tooltip()
-                .position("right")
-                .anchor(Anchor.LEFT_CENTER)
-                .offsetX(5d)
-                .offsetY(5d);
-        anyChartView.setChart(cartesian);
+//        setContentView(R.layout.chart_layout);
+//        AnyChartView anyChartView = (AnyChartView) findViewById(R.id.any_chart_view);
+//        Cartesian cartesian = AnyChart.line();
+//        cartesian.title("Original signal");
+//        cartesian.yAxis(0).title("Value");
+//        cartesian.xAxis(0).title("Sample");
+//        List<DataEntry> seriesData = new ArrayList<>();
+//        for (int i = 0; i < audioValues.length; i++) {
+//            seriesData.add(new CustomDataEntry(i, audioValues[i]));
+//        }
+//        Set set = Set.instantiate();
+//        set.data(seriesData);
+//        Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
+//        Line series1 = cartesian.line(series1Mapping);
+//        series1.hovered().markers().enabled(true);
+//        series1.hovered().markers()
+//                .type(MarkerType.CIRCLE)
+//                .size(4d);
+//        series1.tooltip()
+//                .position("right")
+//                .anchor(Anchor.LEFT_CENTER)
+//                .offsetX(5d)
+//                .offsetY(5d);
+//        anyChartView.setChart(cartesian);
         spectri(audioValues, (int) morseToTextConverter.getWavFile().getSampleRate(), 400, 600, 50);
     }
 
